@@ -16,6 +16,6 @@ class UserObserver
 
     public function updating(User $user)
     {
-        //
+
     }
 }

@@ -177,6 +177,9 @@ return [
         App\Providers\EventServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
 
+        //注册短信发送服务提供者
+        App\Providers\EasySmsServiceProvider::class,
+
     ],
 
     /*

@@ -25,6 +25,7 @@ class AppServiceProvider extends ServiceProvider
             // 是否是站长
             return \Auth::user()->hasRole('Founder');
         });
+
     }
 
     /**

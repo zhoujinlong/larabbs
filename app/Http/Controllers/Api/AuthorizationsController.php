@@ -8,22 +8,21 @@ use App\Http\Requests\Api\AuthorizationRequest;
 use App\Models\User;
 use Auth;
 
+use Zend\Diactoros\Response as Psr7Response;
+use Psr\Http\Message\ServerRequestInterface;
+use League\OAuth2\Server\Exception\OAuthServerException;
+use League\OAuth2\Server\AuthorizationServer;
+
 class AuthorizationsController extends Controller
 {
 
-    public function store(AuthorizationRequest $request){
-
-        $username = $request->username;
-        $credentials = [];
-        filter_var($username, FILTER_VALIDATE_EMAIL) ? $credentials['email'] = $username : $credentials['phone'] = $username;
-        $credentials['password'] = $request->password;
-
-        if (!$token = Auth::guard('api')->attempt($credentials)){
-            return $this->response->errorUnauthorized(trans('auth.failed'));
+    public function store(AuthorizationRequest $originRequest, AuthorizationServer $server, ServerRequestInterface $serverRequest)
+    {
+        try {
+            return $server->respondToAccessTokenRequest($serverRequest, new Psr7Response)->withStatus(201);
+        } catch(OAuthServerException $e) {
+            return $this->response->errorUnauthorized($e->getMessage());
         }
-
-        return $this->respondWithToken($token)->setStatusCode(201);
-
     }
 
     public function socialStore($type, SocialAuthorizationRequest $request)
@@ -86,15 +85,19 @@ class AuthorizationsController extends Controller
 
     }
 
-    public function update(){
-
-        $token = Auth::guard('api')->refresh();
-        return $this->respondWithToken($token);
+    public function update(AuthorizationServer $server, ServerRequestInterface $serverRequest)
+    {
+        try {
+            return $server->respondToAccessTokenRequest($serverRequest, new Psr7Response);
+        } catch(OAuthServerException $e) {
+            return $this->response->errorUnauthorized($e->getMessage());
+        }
     }
 
     public function destroy(){
 
-        Auth::guard('api')->logout();
+        $this->user()->token()->revoke();
+
         return $this->response->noContent();
     }
     

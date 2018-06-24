@@ -179,6 +179,8 @@ return [
 
         //注册短信发送服务提供者
         App\Providers\EasySmsServiceProvider::class,
+        //注册app信息推送服务提供者
+        App\Providers\JpushServiceProvider::class,
 
     ],
 
